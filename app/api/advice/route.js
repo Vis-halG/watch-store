@@ -1,37 +1,125 @@
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+"use client";
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { useCart } from "./CartContext";
+import Link from "next/link";
 
-export async function POST(req) {
-  try {
-    const { product, livePrice, history } = await req.json();
+export default function ProductCard({ product }) {
+  const { addToCart } = useCart();
 
-    const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  return (
+    <Link
+      href={`/product/${product.id}`}
+      style={{ textDecoration: "none", color: "inherit" }}
+    >
+      <div
+        style={{
+          background: "#435663",
+          borderRadius: "18px",
+          padding: "12px",
+          height: "250px",                 // ⭐ FIXED CARD HEIGHT
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+          transition: "transform .15s ease, box-shadow .15s ease",
+        }}
+      >
+        {/* IMAGE WRAPPER */}
+        <div
+          style={{
+            width: "100%",
+            height: "130px",
+            borderRadius: "12px",
+            background: "#FFFFFF",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            overflow: "hidden",
+          }}
+        >
+          <img
+            src={product.image_url}
+            alt={product.name}
+            style={{
+              width: "90%",
+              height: "90%",
+              objectFit: "contain",
+            }}
+          />
+        </div>
 
-    const last3 =
-      history && history.length > 0
-        ? history
-            .slice(-3)
-            .map((h) => `₹${h.price} (${h.date})`)
-            .join(", ")
-        : "No price history";
+        {/* PRODUCT NAME */}
+        <div
+          style={{
+            fontSize: "13px",
+            fontWeight: 600,
+            marginTop: "8px",
+            color: "#FFF8D4",
+            height: "32px",                 // ⭐ FIX NAME BLOCK HEIGHT
+            overflow: "hidden",
+            lineHeight: "1.2",
+          }}
+        >
+          {product.name}
+        </div>
 
-    const prompt = `
-Give a short BUY or WAIT recommendation.
+        {/* BRAND */}
+        <div
+          style={{
+            fontSize: "11px",
+            marginTop: "2px",
+            color: "rgba(255,248,212,0.6)",
+          }}
+        >
+          {product.brand}
+        </div>
 
-Product: ${product}
-Current Price: ₹${livePrice}
-Recent Price History: ${last3}
+        {/* FOOTER */}
+        <div
+          style={{
+            marginTop: "8px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "14px",
+              fontWeight: 700,
+              color: "#A3B087",
+            }}
+          >
+            ₹{product.price.toLocaleString("en-IN")}
+          </span>
 
-Write only 3 short lines.
-    `;
-
-    const result = await model.generateContent(prompt);
-    return Response.json({ advice: result.response.text() });
-  } catch (err) {
-    console.error("AI ERROR:", err);
-    return Response.json({ advice: "AI advice not available right now." });
-  }
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              addToCart(product);
+            }}
+            style={{
+              background: "#A3B087",
+              color: "#313647",
+              border: "none",
+              padding: "6px 12px",
+              borderRadius: "999px",
+              fontSize: "12px",
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "transform .15s ease, background .2s",
+            }}
+            onMouseDown={(e) => {
+              e.currentTarget.style.transform = "scale(0.9)";
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+            }}
+          >
+            + Add
+          </button>
+        </div>
+      </div>
+    </Link>
+  );
 }

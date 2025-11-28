@@ -1,5 +1,4 @@
 'use client';
-
 export default function Button({ text, onClick, type = 'button', outline, disabled }) {
   return (
     <button

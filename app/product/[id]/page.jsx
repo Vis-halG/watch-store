@@ -68,7 +68,12 @@ export default function ProductDetail() {
       setHistory(histData || []);
 
       // 4) Local Price-Based Advice (NO API needed)
-      const localAdvice = getLocalAdvice(todayPrice, histData || []);
+      const localAdvice = getLocalAdvice(
+  todayPrice,        // Amazon live price
+  histData || [],    // full price history
+  product.price      // ⭐ your website price
+);
+
       setAdvice(localAdvice);
 
       setLoading(false);
